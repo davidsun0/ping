@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <strings.h>
 
 // for networking and sending ICMP packets
@@ -34,11 +35,25 @@ uint16_t icmp_checksum(uint16_t* data, size_t len) {
 int main(int argc, char** argv) {
     int ttl = 64;
     int waitms = 1000;
-    if(argc < 2) {
-        printf("usage: %s destination\n", argv[0]);
+    
+    int i;
+    for(i = 1; i < argc - 1; i ++) {
+        if(strcmp(argv[i], "-w") == 0 && argc > i + 1) {
+            waitms = atoi(argv[i + 1]);
+            i ++;
+        } else if(strcmp(argv[i], "-t") == 0 && argc > i + 1) {
+            ttl = atoi(argv[i + 1]);
+            i ++;
+        } else {
+            printf("usage: %s [-t ttl] [-w deadline] destination\n", argv[0]);
+            exit(1);
+        }
+    }
+    
+    if(i >= argc) {
+        printf("usage: %s [-t ttl] [-w deadline] destination\n", argv[0]);
         exit(1);
     }
-
     // DNS lookup
     char* host_name = argv[argc - 1];
     struct hostent* host = gethostbyname(host_name);
